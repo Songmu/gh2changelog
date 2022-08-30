@@ -6,12 +6,14 @@ import (
 	"github.com/google/go-github/v45/github"
 )
 
+// GitPath sets a git executable path
 func GitPath(p string) Option {
 	return func(gch *GH2Changelog) {
 		gch.gitPath = p
 	}
 }
 
+// RepoPath sets a repository path
 func RepoPath(p string) Option {
 	return func(gch *GH2Changelog) {
 		gch.repoPath = p
@@ -19,6 +21,7 @@ func RepoPath(p string) Option {
 	}
 }
 
+// SetOutputs sets a stdout and a stderr
 func SetOutputs(outStream, errStream io.Writer) Option {
 	return func(gch *GH2Changelog) {
 		gch.c.outStream = outStream
@@ -26,6 +29,7 @@ func SetOutputs(outStream, errStream io.Writer) Option {
 	}
 }
 
+// GitHubClient sets a github.Client
 func GitHubClient(cli *github.Client) Option {
 	return func(gch *GH2Changelog) {
 		gch.gh = cli
