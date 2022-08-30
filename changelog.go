@@ -12,7 +12,7 @@ import (
 const changelogMd = "CHANGELOG.md"
 
 var (
-	versionLinkReg    = regexp.MustCompile(`\n\*\*Full Changelog\*\*: (https://.*)$`)
+	versionLinkReg    = regexp.MustCompile(`(?:^|\n)\*\*Full Changelog\*\*: (https://.*)$`)
 	semverFromLinkReg = regexp.MustCompile(`.*[./](v?[0-9]+\.[0-9]+\.[0-9]+)`)
 	newContribReg     = regexp.MustCompile(`(?ms)## New Contributors.*\z`)
 	genCommentReg     = regexp.MustCompile(`<!-- Release notes generated using configuration.*?-->`)
@@ -33,7 +33,12 @@ func convertKeepAChangelogFormat(md string, d time.Time) string {
 	}
 
 	heading := fmt.Sprintf("## [%s](%s) - %s", semvStr, link, d.UTC().Format("2006-01-02"))
-	md = strings.Replace(md, "## What's Changed", heading, 1)
+	const origHeading = "## What's Changed"
+	if !strings.Contains(md, origHeading) {
+		// empty
+		return heading + "\n"
+	}
+	md = strings.Replace(md, origHeading, heading, 1)
 	md = strings.ReplaceAll(md, "\n* ", "\n- ")
 	md = newContribReg.ReplaceAllString(md, "")
 

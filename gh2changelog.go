@@ -68,6 +68,44 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 	return gch, nil
 }
 
+func (gch *GH2Changelog) draft(ctx context.Context, nextTag string) (string, error) {
+	vers := (&gitsemvers.Semvers{GitPath: "git"}).VersionStrings()
+	var previousTag *string
+	if len(vers) > 0 {
+		previousTag = &vers[0]
+	}
+
+	releaseBranch, err := gch.defaultBranch()
+	if err != nil {
+		return "", err
+	}
+	releases, _, err := gch.gh.Repositories.GenerateReleaseNotes(
+		ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
+			TagName:         nextTag,
+			PreviousTagName: previousTag,
+			TargetCommitish: &releaseBranch,
+		})
+	if err != nil {
+		return "", err
+	}
+	return convertKeepAChangelogFormat(releases.Body, time.Now()), nil
+}
+
+func (gch *GH2Changelog) unreleased(ctx context.Context) (string, error) {
+	const tentativeTag = "v999999.999.999"
+	body, err := gch.draft(ctx, tentativeTag)
+	if err != nil {
+		return "", err
+	}
+	bodies := strings.Split(body, "\n")
+	for i, b := range bodies {
+		if strings.HasPrefix(b, `## [`+tentativeTag+`](http`) {
+			bodies[i] = "## [Unreleased]"
+		}
+	}
+	return strings.Join(bodies, "\n") + "\n", nil
+}
+
 func (gch *GH2Changelog) getLogs(ctx context.Context, limit int) ([]string, error) {
 	vers := (&gitsemvers.Semvers{GitPath: "git"}).VersionStrings()
 	// logs := []string{"# Changelog\n"}
@@ -117,4 +155,20 @@ func parseGitURL(u string) (*url.URL, error) {
 		}
 	}
 	return url.Parse(u)
+}
+
+var headBranchReg = regexp.MustCompile(`(?m)^\s*HEAD branch: (.*)$`)
+
+func (gch *GH2Changelog) defaultBranch() (string, error) {
+	// `git symbolic-ref refs/remotes/origin/HEAD` sometimes doesn't work
+	// So use `git remote show origin` for detecting default branch
+	show, _, err := gch.c.GitE("remote", "show", gch.remoteName)
+	if err != nil {
+		return "", fmt.Errorf("failed to detect defaut branch: %w", err)
+	}
+	m := headBranchReg.FindStringSubmatch(show)
+	if len(m) < 2 {
+		return "", fmt.Errorf("failed to detect default branch from remote: %s", gch.remoteName)
+	}
+	return m[1], nil
 }
