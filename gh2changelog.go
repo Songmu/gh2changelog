@@ -14,6 +14,7 @@ import (
 	"github.com/google/go-github/v45/github"
 )
 
+// GH2Changelog is to output changelogs
 type GH2Changelog struct {
 	gitPath                 string
 	repoPath                string
@@ -22,8 +23,10 @@ type GH2Changelog struct {
 	gh                      *github.Client
 }
 
+// Options is for functional option
 type Option func(*GH2Changelog)
 
+// New returns new GH2Changelog
 func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 	gch := &GH2Changelog{
 		gitPath:  "git",
@@ -68,7 +71,8 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 	return gch, nil
 }
 
-func (gch *GH2Changelog) draft(ctx context.Context, nextTag string) (string, error) {
+// Draft gets draft changelog
+func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string) (string, string, error) {
 	vers := (&gitsemvers.Semvers{GitPath: "git"}).VersionStrings()
 	var previousTag *string
 	if len(vers) > 0 {
@@ -77,7 +81,7 @@ func (gch *GH2Changelog) draft(ctx context.Context, nextTag string) (string, err
 
 	releaseBranch, err := gch.defaultBranch()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	releases, _, err := gch.gh.Repositories.GenerateReleaseNotes(
 		ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
@@ -86,16 +90,17 @@ func (gch *GH2Changelog) draft(ctx context.Context, nextTag string) (string, err
 			TargetCommitish: &releaseBranch,
 		})
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	return convertKeepAChangelogFormat(releases.Body, time.Now()), nil
+	return convertKeepAChangelogFormat(releases.Body, time.Now()), releases.Body, nil
 }
 
-func (gch *GH2Changelog) unreleased(ctx context.Context) (string, error) {
+// Unreleased gets unreleased changelog
+func (gch *GH2Changelog) Unreleased(ctx context.Context) (string, string, error) {
 	const tentativeTag = "v999999.999.999"
-	body, err := gch.draft(ctx, tentativeTag)
+	body, orig, err := gch.Draft(ctx, tentativeTag)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	bodies := strings.Split(body, "\n")
 	for i, b := range bodies {
@@ -103,26 +108,59 @@ func (gch *GH2Changelog) unreleased(ctx context.Context) (string, error) {
 			bodies[i] = "## [Unreleased]"
 		}
 	}
-	return strings.Join(bodies, "\n") + "\n", nil
+	return strings.Join(bodies, "\n") + "\n", orig, nil
 }
 
-func (gch *GH2Changelog) getLogs(ctx context.Context, limit int) ([]string, error) {
+// Latest gets latest changelog
+func (gch *GH2Changelog) Latest(ctx context.Context) (string, string, error) {
+	vers := (&gitsemvers.Semvers{GitPath: "git"}).VersionStrings()
+	if len(vers) == 0 {
+		return "", "", errors.New("no change log found. Never released yet")
+	}
+	ver := vers[0]
+	date, _, err := gch.c.GitE("log", "-1", "--format=%ai", "--date=iso", ver)
+	if err != nil {
+		return "", "", err
+	}
+	d, _ := time.Parse("2006-01-02 15:04:05 -0700", date)
+	releases, _, err := gch.gh.Repositories.GenerateReleaseNotes(
+		ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
+			TagName: ver,
+		})
+	if err != nil {
+		return "", "", err
+	}
+	return strings.TrimSpace(convertKeepAChangelogFormat(releases.Body, d)) + "\n", releases.Body, nil
+}
+
+// Changelogs gets changelogs
+func (gch *GH2Changelog) Changelogs(ctx context.Context, limit int) ([]string, []string, error) {
 	vers := (&gitsemvers.Semvers{GitPath: "git"}).VersionStrings()
 	// logs := []string{"# Changelog\n"}
-	var logs []string
+	var (
+		logs     []string
+		origLogs []string
+	)
 	for i, ver := range vers {
 		if limit != -1 && i > limit {
 			break
 		}
-		date, _, _ := gch.c.GitE("log", "-1", "--format=%ai", "--date=iso", ver)
+		date, _, err := gch.c.GitE("log", "-1", "--format=%ai", "--date=iso", ver)
+		if err != nil {
+			return nil, nil, err
+		}
 		d, _ := time.Parse("2006-01-02 15:04:05 -0700", date)
-		releases, _, _ := gch.gh.Repositories.GenerateReleaseNotes(
+		releases, _, err := gch.gh.Repositories.GenerateReleaseNotes(
 			ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
 				TagName: ver,
 			})
+		if err != nil {
+			return nil, nil, err
+		}
+		origLogs = append(origLogs, releases.Body)
 		logs = append(logs, strings.TrimSpace(convertKeepAChangelogFormat(releases.Body, d))+"\n")
 	}
-	return logs, nil
+	return logs, origLogs, nil
 }
 
 func (gch *GH2Changelog) detectRemote() (string, error) {

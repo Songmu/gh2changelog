@@ -47,9 +47,12 @@ func convertKeepAChangelogFormat(md string, d time.Time) string {
 
 var changelogReg = regexp.MustCompile(`(?i)^# Change\s?log`)
 
-func insertNewChangelog(orig string, section string) string {
+// InsertNewChangelog inserts new section into existing changelog
+func InsertNewChangelog(orig string, section string) string {
 	orig = strings.TrimSpace(orig) + "\n"
 	section = strings.TrimSpace(section) + "\n"
+
+	// TODO: care Unreleased
 
 	var bf bytes.Buffer
 	lineSnr := bufio.NewScanner(strings.NewReader(orig))
