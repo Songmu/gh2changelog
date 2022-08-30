@@ -6,26 +6,10 @@ import (
 )
 
 func TestConvertKeepAChangelogFormat(t *testing.T) {
-
 	input := `<!-- Release notes generated using configuration in .github/release.yml at v0.0.12 -->
 
 ## What's Changed
 * add github.go for github client by @Songmu in https://github.com/Songmu/gh2changelog/pull/1
-* create rc pull request when the default branch proceeded by @Songmu in https://github.com/Songmu/gh2changelog/pull/2
-* dogfooding by @Songmu in https://github.com/Songmu/gh2changelog/pull/3
-* set label to the pull request by @Songmu in https://github.com/Songmu/gh2changelog/pull/5
-* change rc branch naming convention by @Songmu in https://github.com/Songmu/gh2changelog/pull/6
-* adjust auto commit message by @Songmu in https://github.com/Songmu/gh2changelog/pull/8
-* apply the commits added on the RC branch with cherry-pick by @Songmu in https://github.com/Songmu/gh2changelog/pull/9
-* unshallow if a shallow repository by @Songmu in https://github.com/Songmu/gh2changelog/pull/10
-* fix git log by @Songmu in https://github.com/Songmu/gh2changelog/pull/11
-* parse git URL more precise by @Songmu in https://github.com/Songmu/gh2changelog/pull/12
-* fix parseGitURL by @Songmu in https://github.com/Songmu/gh2changelog/pull/13
-* refactor git.go by @Songmu in https://github.com/Songmu/gh2changelog/pull/14
-* set user.email and user.name only if they aren't set by @Songmu in https://github.com/Songmu/gh2changelog/pull/15
-* fix api base handling by @Songmu in https://github.com/Songmu/gh2changelog/pull/16
-* take care of v-prefix or not in tags by @Songmu in https://github.com/Songmu/gh2changelog/pull/17
-* Detect version file and update by @Songmu in https://github.com/Songmu/gh2changelog/pull/18
 * tagging semver to merged gh2changelog by @Songmu in https://github.com/Songmu/gh2changelog/pull/19
 
 ## New Contributors
@@ -36,26 +20,23 @@ func TestConvertKeepAChangelogFormat(t *testing.T) {
 
 	expect := `## [v0.0.1](https://github.com/Songmu/gh2changelog/commits/v0.0.1) - 2022-08-16
 - add github.go for github client by @Songmu in https://github.com/Songmu/gh2changelog/pull/1
-- create rc pull request when the default branch proceeded by @Songmu in https://github.com/Songmu/gh2changelog/pull/2
-- dogfooding by @Songmu in https://github.com/Songmu/gh2changelog/pull/3
-- set label to the pull request by @Songmu in https://github.com/Songmu/gh2changelog/pull/5
-- change rc branch naming convention by @Songmu in https://github.com/Songmu/gh2changelog/pull/6
-- adjust auto commit message by @Songmu in https://github.com/Songmu/gh2changelog/pull/8
-- apply the commits added on the RC branch with cherry-pick by @Songmu in https://github.com/Songmu/gh2changelog/pull/9
-- unshallow if a shallow repository by @Songmu in https://github.com/Songmu/gh2changelog/pull/10
-- fix git log by @Songmu in https://github.com/Songmu/gh2changelog/pull/11
-- parse git URL more precise by @Songmu in https://github.com/Songmu/gh2changelog/pull/12
-- fix parseGitURL by @Songmu in https://github.com/Songmu/gh2changelog/pull/13
-- refactor git.go by @Songmu in https://github.com/Songmu/gh2changelog/pull/14
-- set user.email and user.name only if they aren't set by @Songmu in https://github.com/Songmu/gh2changelog/pull/15
-- fix api base handling by @Songmu in https://github.com/Songmu/gh2changelog/pull/16
-- take care of v-prefix or not in tags by @Songmu in https://github.com/Songmu/gh2changelog/pull/17
-- Detect version file and update by @Songmu in https://github.com/Songmu/gh2changelog/pull/18
 - tagging semver to merged gh2changelog by @Songmu in https://github.com/Songmu/gh2changelog/pull/19
 `
 
-	got := convertKeepAChangelogFormat(input, time.Date(2022, time.August, 16, 18, 10, 10, 0, time.UTC))
+	ti := time.Date(2022, time.August, 16, 18, 10, 10, 0, time.UTC)
+	got := convertKeepAChangelogFormat(input, ti)
 	if got != expect {
 		t.Errorf("error:\n %s", got)
+	}
+
+	input2 := `<!-- Release notes generated using configuration in .github/release.yml at v0.0.12 -->
+
+**Full Changelog**: https://github.com/Songmu/godzil/compare/v0.20.12...v1.0.0`
+
+	expect2 := "## [v1.0.0](https://github.com/Songmu/godzil/compare/v0.20.12...v1.0.0) - 2022-08-16\n"
+
+	got2 := convertKeepAChangelogFormat(input2, ti)
+	if got2 != expect2 {
+		t.Errorf("error:\n %s", got2)
 	}
 }
