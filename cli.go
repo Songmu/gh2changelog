@@ -24,18 +24,22 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		fmt.Sprintf("%s (v%s rev:%s)", cmdName, version, revision), flag.ContinueOnError)
 	fs.SetOutput(errStream)
 	var (
-		ver     = fs.Bool("version", false, "display version")
-		verbose = fs.Bool("verbose", false, "verbose")
-		git     = fs.String("git", "git", "git path")
-		repo    = fs.String("repo", ".", "local repository path")
+		ver = fs.Bool("version", false, "display version")
 
-		tag        = fs.String("tag", "", "specify the tag")
+		git  = fs.String("git", "git", "git path")
+		repo = fs.String("repo", ".", "local repository path")
+
+		verbose = fs.Bool("verbose", false, "verbose")
+
+		tag        = fs.String("tag", "", "specify existing tag")
 		next       = fs.String("next", "", "tag to be released next")
 		unreleased = fs.Bool("unreleased", false, "output unreleased")
 		latest     = fs.Bool("latest", false, "get latest changelog section")
-		limit      = fs.Int("limit", 0, "limit")
-		all        = fs.Bool("all", false, "output all changelogs")
-		write      = fs.Bool("w", false, "write result to file")
+		limit      = fs.Int("limit", 0, "outputs the specified number of most recent changelogs")
+		all        = fs.Bool("all", false, "outputs all changelogs")
+
+		alone = fs.Bool("alone", false, "only outputs the specified changelog without merging with CHANGELOG.md.")
+		write = fs.Bool("w", false, "write result to CHANGELOG.md")
 	)
 
 	if err := fs.Parse(argv); err != nil {
@@ -120,6 +124,14 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 	}
 
 	out := strings.Join(outs, "\n")
+
+	if *alone {
+		if *write {
+			log.Println("Both alone and w options are specified, but alone takes precedence.")
+		}
+		_, err = fmt.Fprint(outStream, out)
+		return err
+	}
 
 	b, err := os.ReadFile(chMdPath)
 	if err != nil && !os.IsNotExist(err) {
