@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-const changelogMd = "CHANGELOG.md"
-
 var (
 	versionLinkReg    = regexp.MustCompile(`(?:^|\n)\*\*Full Changelog\*\*: (https://.*)$`)
 	semverFromLinkReg = regexp.MustCompile(`.*[./](v?[0-9]+\.[0-9]+\.[0-9]+)`)
@@ -45,14 +43,14 @@ func convertKeepAChangelogFormat(md string, d time.Time) string {
 	return strings.TrimSpace(md) + "\n"
 }
 
-var changelogReg = regexp.MustCompile(`(?i)^# Change\s?log`)
+var unreleasedReg = regexp.MustCompile(`(?ms)^## \[Unreleased\]\(.*?\n+(## |\z)`)
 
-// InsertNewChangelog inserts new section into existing changelog
-func InsertNewChangelog(orig string, section string) string {
+func insertNewChangelog(orig string, section string) string {
 	orig = strings.TrimSpace(orig) + "\n"
-	section = strings.TrimSpace(section) + "\n"
+	orig = unreleasedReg.ReplaceAllString(orig, `$1`)
+	orig = strings.TrimSpace(orig) + "\n"
 
-	// TODO: care Unreleased
+	section = strings.TrimSpace(section) + "\n"
 
 	var bf bytes.Buffer
 	lineSnr := bufio.NewScanner(strings.NewReader(orig))
