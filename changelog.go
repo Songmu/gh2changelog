@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-const changelogMd = "CHANGELOG.md"
-
 var (
 	versionLinkReg    = regexp.MustCompile(`(?:^|\n)\*\*Full Changelog\*\*: (https://.*)$`)
 	semverFromLinkReg = regexp.MustCompile(`.*[./](v?[0-9]+\.[0-9]+\.[0-9]+)`)

@@ -55,11 +55,7 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 		return nil, fmt.Errorf("failed to detect owner and repo from remote URL")
 	}
 	gch.owner = m[0]
-	repo := m[1]
-	if u.Scheme == "ssh" || u.Scheme == "git" {
-		repo = strings.TrimSuffix(repo, ".git")
-	}
-	gch.repo = repo
+	gch.repo = strings.TrimSuffix(m[1], ".git")
 
 	if gch.gh == nil {
 		cli, err := ghClient(ctx, "", u.Hostname())
@@ -117,15 +113,19 @@ func (gch *GH2Changelog) Latest(ctx context.Context) (string, string, error) {
 	if len(vers) == 0 {
 		return "", "", errors.New("no change log found. Never released yet")
 	}
-	ver := vers[0]
-	date, _, err := gch.c.GitE("log", "-1", "--format=%ai", "--date=iso", ver)
+	return gch.Changelog(ctx, vers[0])
+}
+
+// Changelog gets changelog for specified tag
+func (gch *GH2Changelog) Changelog(ctx context.Context, tag string) (string, string, error) {
+	date, _, err := gch.c.GitE("log", "-1", "--format=%ai", "--date=iso", tag)
 	if err != nil {
 		return "", "", err
 	}
 	d, _ := time.Parse("2006-01-02 15:04:05 -0700", date)
 	releases, _, err := gch.gh.Repositories.GenerateReleaseNotes(
 		ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
-			TagName: ver,
+			TagName: tag,
 		})
 	if err != nil {
 		return "", "", err
