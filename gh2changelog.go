@@ -172,6 +172,12 @@ const (
 	Trunc
 )
 
+const (
+	changelogMd = "CHANGELOG.md"
+	heading     = "# Changelog\n"
+)
+
+// Update CHANGELOG.md
 func (gch *GH2Changelog) Update(section string, mode int) (string, error) {
 	dryRun := mode&DryRun != 0
 	trunc := mode&Trunc != 0
@@ -186,7 +192,7 @@ func (gch *GH2Changelog) Update(section string, mode int) (string, error) {
 	if orig == "" {
 		out = heading + "\n" + out
 	} else {
-		out = InsertNewChangelog(orig, out)
+		out = insertNewChangelog(orig, out)
 	}
 
 	if trunc && !dryRun {

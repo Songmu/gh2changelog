@@ -45,8 +45,7 @@ func convertKeepAChangelogFormat(md string, d time.Time) string {
 
 var unreleasedReg = regexp.MustCompile(`(?ms)^## \[Unreleased\]\(.*?\n+(## |\z)`)
 
-// InsertNewChangelog inserts new section into existing changelog
-func InsertNewChangelog(orig string, section string) string {
+func insertNewChangelog(orig string, section string) string {
 	orig = strings.TrimSpace(orig) + "\n"
 	orig = unreleasedReg.ReplaceAllString(orig, `$1`)
 	orig = strings.TrimSpace(orig) + "\n"

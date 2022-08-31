@@ -9,11 +9,7 @@ import (
 	"strings"
 )
 
-const (
-	cmdName     = "gh2changelog"
-	changelogMd = "CHANGELOG.md"
-	heading     = "# Changelog\n"
-)
+const cmdName = "gh2changelog"
 
 // Run the gh2changelog
 func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) error {
