@@ -6,15 +6,13 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
-	"path/filepath"
 	"strings"
 )
 
 const (
 	cmdName     = "gh2changelog"
 	changelogMd = "CHANGELOG.md"
-	Heading     = "# Changelog\n"
+	heading     = "# Changelog\n"
 )
 
 // Run the gh2changelog
@@ -64,8 +62,6 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		*limit = -1
 	}
 
-	chMdPath := filepath.Join(*repo, changelogMd)
-
 	if *limit != 0 {
 		logs, _, err := gch.Changelogs(ctx, *limit)
 		if err != nil {
@@ -79,13 +75,21 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 			logs = append([]string{log}, logs...)
 		}
 
-		out := strings.Join(append([]string{Heading}, logs...), "\n")
+		out := strings.Join(logs, "\n")
 
+		mode := Trunc
 		if !*write {
-			_, err := fmt.Fprint(outStream, out)
+			mode |= DryRun
+		}
+		out, err = gch.Update(out, mode)
+		if err != nil {
 			return err
 		}
-		return os.WriteFile(chMdPath, []byte(out), 0666)
+		if !*write {
+			_, err = fmt.Fprint(outStream, out)
+			return err
+		}
+		return nil
 	}
 
 	var outs []string
@@ -133,21 +137,19 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		return err
 	}
 
-	b, err := os.ReadFile(chMdPath)
-	if err != nil && !os.IsNotExist(err) {
+	mode := 0
+	if !*write {
+		mode |= DryRun
+	}
+	out, err = gch.Update(out, mode)
+	if err != nil {
 		return err
 	}
-	orig := string(b)
-	if orig == "" {
-		out = Heading + "\n" + out
-	} else {
-		out = InsertNewChangelog(orig, out)
+	if !*write {
+		_, err = fmt.Fprint(outStream, out)
+		return err
 	}
-	if *write {
-		return os.WriteFile(chMdPath, []byte(out), 0666)
-	}
-	_, err = fmt.Fprint(outStream, out)
-	return err
+	return nil
 }
 
 func printVersion(out io.Writer) error {

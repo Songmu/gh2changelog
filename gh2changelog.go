@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -163,6 +165,46 @@ func (gch *GH2Changelog) Changelogs(ctx context.Context, limit int) ([]string, [
 		logs = append(logs, strings.TrimSpace(convertKeepAChangelogFormat(releases.Body, d))+"\n")
 	}
 	return logs, origLogs, nil
+}
+
+const (
+	DryRun = 1 << iota
+	Trunc
+)
+
+func (gch *GH2Changelog) Update(section string, mode int) (string, error) {
+	dryRun := mode&DryRun != 0
+	trunc := mode&Trunc != 0
+	chMdPath := gch.path()
+	out := section
+
+	b, err := os.ReadFile(chMdPath)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
+	}
+	orig := string(b)
+	if orig == "" {
+		out = heading + "\n" + out
+	} else {
+		out = InsertNewChangelog(orig, out)
+	}
+
+	if trunc && !dryRun {
+		if err := os.Remove(chMdPath); err != nil {
+			return "", err
+		}
+	}
+
+	if !dryRun {
+		if err := os.WriteFile(chMdPath, []byte(out), 0666); err != nil {
+			return "", err
+		}
+	}
+	return out, nil
+}
+
+func (gch *GH2Changelog) path() string {
+	return filepath.Join(gch.repoPath, changelogMd)
 }
 
 func (gch *GH2Changelog) detectRemote() (string, error) {
