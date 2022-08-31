@@ -30,7 +30,7 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		repo    = fs.String("repo", ".", "local repository path")
 
 		tag        = fs.String("tag", "", "specify the tag")
-		next       = fs.String("next", "", "next")
+		next       = fs.String("next", "", "tag to be released next")
 		unreleased = fs.Bool("unreleased", false, "output unreleased")
 		latest     = fs.Bool("latest", false, "get latest changelog section")
 		limit      = fs.Int("limit", 0, "limit")
@@ -54,6 +54,9 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		return err
 	}
 	if *all {
+		if *limit != 0 {
+			log.Println("Both the limit and all options are specified, but the all option takes precedence.")
+		}
 		*limit = -1
 	}
 
@@ -83,27 +86,24 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 
 	var outs []string
 
-	if *unreleased {
-		out, _, err := gch.Unreleased(ctx)
-		if err != nil {
-			return err
+	if *next != "" {
+		if *unreleased {
+			log.Println("Both unreleased and next options are specified, but next takes precedence.")
 		}
-		outs = append(outs, out)
-	} else if *next != "" {
 		out, _, err := gch.Draft(ctx, *next)
 		if err != nil {
 			return err
 		}
 		outs = append(outs, out)
-	} else if *tag != "" {
-		out, _, err := gch.Changelog(ctx, *tag)
+	} else if *unreleased {
+		out, _, err := gch.Unreleased(ctx)
 		if err != nil {
 			return err
 		}
 		outs = append(outs, out)
 	}
 
-	if *latest || len(outs) < 1 {
+	if *latest || (len(outs) < 1 && *tag == "") {
 		out, _, err := gch.Latest(ctx)
 		if err != nil {
 			return err
@@ -111,11 +111,15 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		outs = append(outs, out)
 	}
 
-	out := strings.Join(outs, "\n")
-	if !*write {
-		_, err := fmt.Fprint(outStream, out)
-		return err
+	if *tag != "" {
+		out, _, err := gch.Changelog(ctx, *tag)
+		if err != nil {
+			return err
+		}
+		outs = append(outs, out)
 	}
+
+	out := strings.Join(outs, "\n")
 
 	b, err := os.ReadFile(chMdPath)
 	if err != nil && !os.IsNotExist(err) {
@@ -127,7 +131,11 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 	} else {
 		out = InsertNewChangelog(orig, out)
 	}
-	return os.WriteFile(chMdPath, []byte(out), 0666)
+	if *write {
+		return os.WriteFile(chMdPath, []byte(out), 0666)
+	}
+	_, err = fmt.Fprint(outStream, out)
+	return err
 }
 
 func printVersion(out io.Writer) error {
