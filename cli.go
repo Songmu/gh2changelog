@@ -70,22 +70,7 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 			}
 			logs = append([]string{log}, logs...)
 		}
-
-		out := strings.Join(logs, "\n")
-
-		mode := Trunc
-		if !*write {
-			mode |= DryRun
-		}
-		out, err = gch.Update(out, mode)
-		if err != nil {
-			return err
-		}
-		if !*write {
-			_, err = fmt.Fprint(outStream, out)
-			return err
-		}
-		return nil
+		return gch.output(outStream, strings.Join(logs, "\n"), Trunc, *write)
 	}
 
 	var outs []string
@@ -132,16 +117,18 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		_, err = fmt.Fprint(outStream, out)
 		return err
 	}
+	return gch.output(outStream, out, 0, *write)
+}
 
-	mode := 0
-	if !*write {
+func (gch *GH2Changelog) output(outStream io.Writer, out string, mode int, write bool) error {
+	if !write {
 		mode |= DryRun
 	}
-	out, err = gch.Update(out, mode)
+	out, err := gch.Update(out, mode)
 	if err != nil {
 		return err
 	}
-	if !*write {
+	if !write {
 		_, err = fmt.Fprint(outStream, out)
 		return err
 	}

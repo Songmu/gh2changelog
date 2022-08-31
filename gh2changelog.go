@@ -184,21 +184,19 @@ func (gch *GH2Changelog) Update(section string, mode int) (string, error) {
 	chMdPath := gch.path()
 	out := section
 
-	b, err := os.ReadFile(chMdPath)
-	if err != nil && !os.IsNotExist(err) {
-		return "", err
+	var orig string
+	if !trunc {
+		b, err := os.ReadFile(chMdPath)
+		if err != nil && !os.IsNotExist(err) {
+			return "", err
+		}
+		orig = string(b)
 	}
-	orig := string(b)
+
 	if orig == "" {
 		out = heading + "\n" + out
 	} else {
 		out = insertNewChangelog(orig, out)
-	}
-
-	if trunc && !dryRun {
-		if err := os.Remove(chMdPath); err != nil {
-			return "", err
-		}
 	}
 
 	if !dryRun {
