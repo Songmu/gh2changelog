@@ -73,7 +73,7 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 
 // Draft gets draft changelog
 func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string) (string, string, error) {
-	vers := (&gitsemvers.Semvers{GitPath: "git"}).VersionStrings()
+	vers := (&gitsemvers.Semvers{GitPath: gch.gitPath}).VersionStrings()
 	var previousTag *string
 	if len(vers) > 0 {
 		previousTag = &vers[0]
@@ -113,7 +113,7 @@ func (gch *GH2Changelog) Unreleased(ctx context.Context) (string, string, error)
 
 // Latest gets latest changelog
 func (gch *GH2Changelog) Latest(ctx context.Context) (string, string, error) {
-	vers := (&gitsemvers.Semvers{GitPath: "git"}).VersionStrings()
+	vers := (&gitsemvers.Semvers{GitPath: gch.gitPath}).VersionStrings()
 	if len(vers) == 0 {
 		return "", "", errors.New("no change log found. Never released yet")
 	}
@@ -135,7 +135,7 @@ func (gch *GH2Changelog) Latest(ctx context.Context) (string, string, error) {
 
 // Changelogs gets changelogs
 func (gch *GH2Changelog) Changelogs(ctx context.Context, limit int) ([]string, []string, error) {
-	vers := (&gitsemvers.Semvers{GitPath: "git"}).VersionStrings()
+	vers := (&gitsemvers.Semvers{GitPath: gch.gitPath}).VersionStrings()
 	// logs := []string{"# Changelog\n"}
 	var (
 		logs     []string
