@@ -42,7 +42,7 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 	if err != nil {
 		return nil, err
 	}
-	remoteURL, _, err := gch.c.GitE("config", "remote."+gch.remoteName+".url")
+	remoteURL, _, err := gch.c.Git("config", "remote."+gch.remoteName+".url")
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (gch *GH2Changelog) Latest(ctx context.Context) (string, string, error) {
 
 // Changelog gets changelog for specified tag
 func (gch *GH2Changelog) Changelog(ctx context.Context, tag string) (string, string, error) {
-	date, _, err := gch.c.GitE("log", "-1", "--format=%ai", "--date=iso", tag)
+	date, _, err := gch.c.Git("log", "-1", "--format=%ai", "--date=iso", tag)
 	if err != nil {
 		return "", "", err
 	}
@@ -148,7 +148,7 @@ func (gch *GH2Changelog) Changelogs(ctx context.Context, limit int) ([]string, [
 		if limit != -1 && i > limit {
 			break
 		}
-		date, _, err := gch.c.GitE("log", "-1", "--format=%ai", "--date=iso", ver)
+		date, _, err := gch.c.Git("log", "-1", "--format=%ai", "--date=iso", ver)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -167,7 +167,7 @@ func (gch *GH2Changelog) Changelogs(ctx context.Context, limit int) ([]string, [
 }
 
 func (gch *GH2Changelog) detectRemote() (string, error) {
-	remotesStr, _, err := gch.c.GitE("remote")
+	remotesStr, _, err := gch.c.Git("remote")
 	if err != nil {
 		return "", fmt.Errorf("failed to detect remote: %s", err)
 	}
@@ -203,7 +203,7 @@ var headBranchReg = regexp.MustCompile(`(?m)^\s*HEAD branch: (.*)$`)
 func (gch *GH2Changelog) defaultBranch() (string, error) {
 	// `git symbolic-ref refs/remotes/origin/HEAD` sometimes doesn't work
 	// So use `git remote show origin` for detecting default branch
-	show, _, err := gch.c.GitE("remote", "show", gch.remoteName)
+	show, _, err := gch.c.Git("remote", "show", gch.remoteName)
 	if err != nil {
 		return "", fmt.Errorf("failed to detect defaut branch: %w", err)
 	}
