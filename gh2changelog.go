@@ -101,7 +101,10 @@ func (gch *GH2Changelog) Unreleased(ctx context.Context) (string, string, error)
 	bodies := strings.Split(body, "\n")
 	for i, b := range bodies {
 		if strings.HasPrefix(b, `## [`+tentativeTag+`](http`) {
-			bodies[i] = "## [Unreleased]"
+			b = strings.Replace(b, tentativeTag, "Unreleased", 1)
+			b = strings.Replace(b, tentativeTag, "HEAD", 1)
+			b = strings.TrimRight(b, " -0123456789") // remove date suffix e.g. " - 2022-06-05"
+			bodies[i] = b
 		}
 	}
 	return strings.Join(bodies, "\n") + "\n", orig, nil
