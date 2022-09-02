@@ -18,11 +18,14 @@ import (
 
 // GH2Changelog is to output changelogs
 type GH2Changelog struct {
-	gitPath                 string
-	repoPath                string
+	gitPath  string
+	repoPath string
+
 	owner, repo, remoteName string
-	c                       *commander
-	gh                      *github.Client
+	outStream, errStream    io.Writer
+
+	c  gitter
+	gh *github.Client
 }
 
 // Options is for functional option
@@ -31,12 +34,21 @@ type Option func(*GH2Changelog)
 // New returns new GH2Changelog
 func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 	gch := &GH2Changelog{
-		gitPath:  "git",
-		repoPath: ".",
-		c:        &commander{dir: ".", outStream: io.Discard, errStream: io.Discard},
+		gitPath:   "git",
+		repoPath:  ".",
+		outStream: io.Discard,
+		errStream: io.Discard,
 	}
 	for _, opt := range opts {
 		opt(gch)
+	}
+
+	if gch.c == nil {
+		gch.c = &commander{
+			gitPath:   gch.gitPath,
+			dir:       gch.repoPath,
+			outStream: gch.outStream,
+			errStream: gch.errStream}
 	}
 
 	var err error

@@ -17,15 +17,14 @@ func GitPath(p string) Option {
 func RepoPath(p string) Option {
 	return func(gch *GH2Changelog) {
 		gch.repoPath = p
-		gch.c.dir = p
 	}
 }
 
 // SetOutputs sets a stdout and a stderr
 func SetOutputs(outStream, errStream io.Writer) Option {
 	return func(gch *GH2Changelog) {
-		gch.c.outStream = outStream
-		gch.c.errStream = errStream
+		gch.outStream = outStream
+		gch.errStream = errStream
 	}
 }
 
