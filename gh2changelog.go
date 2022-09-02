@@ -21,6 +21,10 @@ type releaseNoteGenerator interface {
 		*github.RepositoryReleaseNotes, *github.Response, error)
 }
 
+type versionStringser interface {
+	VersionStrings() []string
+}
+
 // GH2Changelog is to output changelogs
 type GH2Changelog struct {
 	gitPath  string
@@ -29,8 +33,9 @@ type GH2Changelog struct {
 	owner, repo, remoteName string
 	outStream, errStream    io.Writer
 
-	c   gitter
-	gen releaseNoteGenerator
+	c    gitter
+	vser versionStringser
+	gen  releaseNoteGenerator
 }
 
 // Options is for functional option
@@ -54,6 +59,9 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 			dir:       gch.repoPath,
 			outStream: gch.outStream,
 			errStream: gch.errStream}
+	}
+	if gch.vser == nil {
+		gch.vser = &gitsemvers.Semvers{GitPath: gch.gitPath, RepoPath: gch.repoPath}
 	}
 
 	var err error
@@ -278,5 +286,5 @@ func (gch *GH2Changelog) defaultBranch() (string, error) {
 }
 
 func (gch *GH2Changelog) versionStrings() []string {
-	return (&gitsemvers.Semvers{GitPath: gch.gitPath, RepoPath: gch.repoPath}).VersionStrings()
+	return gch.vser.VersionStrings()
 }
