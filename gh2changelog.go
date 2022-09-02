@@ -16,6 +16,11 @@ import (
 	"github.com/google/go-github/v45/github"
 )
 
+type releaseNoteGenerator interface {
+	GenerateReleaseNotes(context.Context, string, string, *github.GenerateNotesOptions) (
+		*github.RepositoryReleaseNotes, *github.Response, error)
+}
+
 // GH2Changelog is to output changelogs
 type GH2Changelog struct {
 	gitPath  string
@@ -24,8 +29,8 @@ type GH2Changelog struct {
 	owner, repo, remoteName string
 	outStream, errStream    io.Writer
 
-	c  gitter
-	gh *github.Client
+	c   gitter
+	gen releaseNoteGenerator
 }
 
 // Options is for functional option
@@ -71,13 +76,14 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 	gch.owner = m[0]
 	gch.repo = strings.TrimSuffix(m[1], ".git")
 
-	if gch.gh == nil {
+	if gch.gen == nil {
 		cli, err := ghClient(ctx, "", u.Hostname())
 		if err != nil {
 			return nil, err
 		}
-		gch.gh = cli
+		gch.gen = cli.Repositories
 	}
+
 	return gch, nil
 }
 
@@ -93,7 +99,7 @@ func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string) (string, str
 	if err != nil {
 		return "", "", err
 	}
-	releases, _, err := gch.gh.Repositories.GenerateReleaseNotes(
+	releases, _, err := gch.gen.GenerateReleaseNotes(
 		ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
 			TagName:         nextTag,
 			PreviousTagName: previousTag,
@@ -140,7 +146,7 @@ func (gch *GH2Changelog) Changelog(ctx context.Context, tag string) (string, str
 		return "", "", err
 	}
 	d, _ := time.Parse("2006-01-02 15:04:05 -0700", date)
-	releases, _, err := gch.gh.Repositories.GenerateReleaseNotes(
+	releases, _, err := gch.gen.GenerateReleaseNotes(
 		ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
 			TagName: tag,
 		})
@@ -166,7 +172,7 @@ func (gch *GH2Changelog) Changelogs(ctx context.Context, limit int) ([]string, [
 			return nil, nil, err
 		}
 		d, _ := time.Parse("2006-01-02 15:04:05 -0700", date)
-		releases, _, err := gch.gh.Repositories.GenerateReleaseNotes(
+		releases, _, err := gch.gen.GenerateReleaseNotes(
 			ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
 				TagName: ver,
 			})

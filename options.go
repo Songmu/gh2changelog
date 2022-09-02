@@ -31,6 +31,6 @@ func SetOutputs(outStream, errStream io.Writer) Option {
 // GitHubClient sets a github.Client
 func GitHubClient(cli *github.Client) Option {
 	return func(gch *GH2Changelog) {
-		gch.gh = cli
+		gch.gen = cli.Repositories
 	}
 }
