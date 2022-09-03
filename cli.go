@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"strings"
+	"time"
 )
 
 const cmdName = "gh2changelog"
@@ -79,7 +80,7 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		if *unreleased {
 			log.Println("Both unreleased and next options are specified, but next takes precedence.")
 		}
-		out, _, err := gch.Draft(ctx, *next)
+		out, _, err := gch.Draft(ctx, *next, time.Now())
 		if err != nil {
 			return err
 		}

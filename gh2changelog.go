@@ -92,7 +92,7 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 }
 
 // Draft gets draft changelog
-func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string) (string, string, error) {
+func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string, releaseDate time.Time) (string, string, error) {
 	vers := gch.semvers
 	var previousTag *string
 	if len(vers) > 0 {
@@ -112,13 +112,13 @@ func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string) (string, str
 	if err != nil {
 		return "", "", err
 	}
-	return convertKeepAChangelogFormat(releases.Body, time.Now()), releases.Body, nil
+	return convertKeepAChangelogFormat(releases.Body, releaseDate), releases.Body, nil
 }
 
 // Unreleased gets unreleased changelog
 func (gch *GH2Changelog) Unreleased(ctx context.Context) (string, string, error) {
 	const tentativeTag = "v999999.999.999"
-	body, orig, err := gch.Draft(ctx, tentativeTag)
+	body, orig, err := gch.Draft(ctx, tentativeTag, time.Now())
 	if err != nil {
 		return "", "", err
 	}
@@ -131,7 +131,7 @@ func (gch *GH2Changelog) Unreleased(ctx context.Context) (string, string, error)
 			bodies[i] = b
 		}
 	}
-	return strings.Join(bodies, "\n") + "\n", orig, nil
+	return strings.TrimSpace(strings.Join(bodies, "\n")) + "\n", orig, nil
 }
 
 // Latest gets latest changelog
@@ -171,20 +171,12 @@ func (gch *GH2Changelog) Changelogs(ctx context.Context, limit int) ([]string, [
 		if limit != -1 && i > limit {
 			break
 		}
-		date, _, err := gch.c.Git("log", "-1", "--format=%ai", "--date=iso", ver)
+		log, orig, err := gch.Changelog(ctx, ver)
 		if err != nil {
 			return nil, nil, err
 		}
-		d, _ := time.Parse("2006-01-02 15:04:05 -0700", date)
-		releases, _, err := gch.gen.GenerateReleaseNotes(
-			ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
-				TagName: ver,
-			})
-		if err != nil {
-			return nil, nil, err
-		}
-		origLogs = append(origLogs, releases.Body)
-		logs = append(logs, strings.TrimSpace(convertKeepAChangelogFormat(releases.Body, d))+"\n")
+		origLogs = append(origLogs, orig)
+		logs = append(logs, log)
 	}
 	return logs, origLogs, nil
 }
