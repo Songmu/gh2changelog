@@ -21,10 +21,6 @@ type releaseNoteGenerator interface {
 		*github.RepositoryReleaseNotes, *github.Response, error)
 }
 
-type versionStringser interface {
-	VersionStrings() []string
-}
-
 // GH2Changelog is to output changelogs
 type GH2Changelog struct {
 	gitPath  string
@@ -32,10 +28,10 @@ type GH2Changelog struct {
 
 	owner, repo, remoteName string
 	outStream, errStream    io.Writer
+	semvers                 []string
 
-	c    gitter
-	vser versionStringser
-	gen  releaseNoteGenerator
+	c   gitter
+	gen releaseNoteGenerator
 }
 
 // Options is for functional option
@@ -60,8 +56,8 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 			outStream: gch.outStream,
 			errStream: gch.errStream}
 	}
-	if gch.vser == nil {
-		gch.vser = &gitsemvers.Semvers{GitPath: gch.gitPath, RepoPath: gch.repoPath}
+	if gch.semvers == nil {
+		gch.semvers = (&gitsemvers.Semvers{GitPath: gch.gitPath, RepoPath: gch.repoPath}).VersionStrings()
 	}
 
 	var err error
@@ -97,7 +93,7 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 
 // Draft gets draft changelog
 func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string) (string, string, error) {
-	vers := gch.versionStrings()
+	vers := gch.semvers
 	var previousTag *string
 	if len(vers) > 0 {
 		previousTag = &vers[0]
@@ -140,7 +136,7 @@ func (gch *GH2Changelog) Unreleased(ctx context.Context) (string, string, error)
 
 // Latest gets latest changelog
 func (gch *GH2Changelog) Latest(ctx context.Context) (string, string, error) {
-	vers := gch.versionStrings()
+	vers := gch.semvers
 	if len(vers) == 0 {
 		return "", "", errors.New("no change log found. Never released yet")
 	}
@@ -166,7 +162,7 @@ func (gch *GH2Changelog) Changelog(ctx context.Context, tag string) (string, str
 
 // Changelogs gets changelogs
 func (gch *GH2Changelog) Changelogs(ctx context.Context, limit int) ([]string, []string, error) {
-	vers := gch.versionStrings()
+	vers := gch.semvers
 	var (
 		logs     []string
 		origLogs []string
@@ -283,8 +279,4 @@ func (gch *GH2Changelog) defaultBranch() (string, error) {
 		return "", fmt.Errorf("failed to detect default branch from remote: %s", gch.remoteName)
 	}
 	return m[1], nil
-}
-
-func (gch *GH2Changelog) versionStrings() []string {
-	return gch.vser.VersionStrings()
 }
