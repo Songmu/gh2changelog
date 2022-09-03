@@ -16,13 +16,22 @@ import (
 	"github.com/google/go-github/v45/github"
 )
 
+type releaseNoteGenerator interface {
+	GenerateReleaseNotes(context.Context, string, string, *github.GenerateNotesOptions) (
+		*github.RepositoryReleaseNotes, *github.Response, error)
+}
+
 // GH2Changelog is to output changelogs
 type GH2Changelog struct {
-	gitPath                 string
-	repoPath                string
+	gitPath  string
+	repoPath string
+
 	owner, repo, remoteName string
-	c                       *commander
-	gh                      *github.Client
+	outStream, errStream    io.Writer
+	semvers                 []string
+
+	c   gitter
+	gen releaseNoteGenerator
 }
 
 // Options is for functional option
@@ -31,12 +40,24 @@ type Option func(*GH2Changelog)
 // New returns new GH2Changelog
 func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 	gch := &GH2Changelog{
-		gitPath:  "git",
-		repoPath: ".",
-		c:        &commander{dir: ".", outStream: io.Discard, errStream: io.Discard},
+		gitPath:   "git",
+		repoPath:  ".",
+		outStream: io.Discard,
+		errStream: io.Discard,
 	}
 	for _, opt := range opts {
 		opt(gch)
+	}
+
+	if gch.c == nil {
+		gch.c = &commander{
+			gitPath:   gch.gitPath,
+			dir:       gch.repoPath,
+			outStream: gch.outStream,
+			errStream: gch.errStream}
+	}
+	if gch.semvers == nil {
+		gch.semvers = (&gitsemvers.Semvers{GitPath: gch.gitPath, RepoPath: gch.repoPath}).VersionStrings()
 	}
 
 	var err error
@@ -59,19 +80,20 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 	gch.owner = m[0]
 	gch.repo = strings.TrimSuffix(m[1], ".git")
 
-	if gch.gh == nil {
+	if gch.gen == nil {
 		cli, err := ghClient(ctx, "", u.Hostname())
 		if err != nil {
 			return nil, err
 		}
-		gch.gh = cli
+		gch.gen = cli.Repositories
 	}
+
 	return gch, nil
 }
 
 // Draft gets draft changelog
-func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string) (string, string, error) {
-	vers := gch.versionStrings()
+func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string, releaseDate time.Time) (string, string, error) {
+	vers := gch.semvers
 	var previousTag *string
 	if len(vers) > 0 {
 		previousTag = &vers[0]
@@ -81,7 +103,7 @@ func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string) (string, str
 	if err != nil {
 		return "", "", err
 	}
-	releases, _, err := gch.gh.Repositories.GenerateReleaseNotes(
+	releases, _, err := gch.gen.GenerateReleaseNotes(
 		ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
 			TagName:         nextTag,
 			PreviousTagName: previousTag,
@@ -90,13 +112,13 @@ func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string) (string, str
 	if err != nil {
 		return "", "", err
 	}
-	return convertKeepAChangelogFormat(releases.Body, time.Now()), releases.Body, nil
+	return convertKeepAChangelogFormat(releases.Body, releaseDate), releases.Body, nil
 }
 
 // Unreleased gets unreleased changelog
 func (gch *GH2Changelog) Unreleased(ctx context.Context) (string, string, error) {
 	const tentativeTag = "v999999.999.999"
-	body, orig, err := gch.Draft(ctx, tentativeTag)
+	body, orig, err := gch.Draft(ctx, tentativeTag, time.Now())
 	if err != nil {
 		return "", "", err
 	}
@@ -109,12 +131,12 @@ func (gch *GH2Changelog) Unreleased(ctx context.Context) (string, string, error)
 			bodies[i] = b
 		}
 	}
-	return strings.Join(bodies, "\n") + "\n", orig, nil
+	return strings.TrimSpace(strings.Join(bodies, "\n")) + "\n", orig, nil
 }
 
 // Latest gets latest changelog
 func (gch *GH2Changelog) Latest(ctx context.Context) (string, string, error) {
-	vers := gch.versionStrings()
+	vers := gch.semvers
 	if len(vers) == 0 {
 		return "", "", errors.New("no change log found. Never released yet")
 	}
@@ -128,7 +150,7 @@ func (gch *GH2Changelog) Changelog(ctx context.Context, tag string) (string, str
 		return "", "", err
 	}
 	d, _ := time.Parse("2006-01-02 15:04:05 -0700", date)
-	releases, _, err := gch.gh.Repositories.GenerateReleaseNotes(
+	releases, _, err := gch.gen.GenerateReleaseNotes(
 		ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
 			TagName: tag,
 		})
@@ -140,7 +162,7 @@ func (gch *GH2Changelog) Changelog(ctx context.Context, tag string) (string, str
 
 // Changelogs gets changelogs
 func (gch *GH2Changelog) Changelogs(ctx context.Context, limit int) ([]string, []string, error) {
-	vers := gch.versionStrings()
+	vers := gch.semvers
 	var (
 		logs     []string
 		origLogs []string
@@ -149,20 +171,12 @@ func (gch *GH2Changelog) Changelogs(ctx context.Context, limit int) ([]string, [
 		if limit != -1 && i > limit {
 			break
 		}
-		date, _, err := gch.c.Git("log", "-1", "--format=%ai", "--date=iso", ver)
+		log, orig, err := gch.Changelog(ctx, ver)
 		if err != nil {
 			return nil, nil, err
 		}
-		d, _ := time.Parse("2006-01-02 15:04:05 -0700", date)
-		releases, _, err := gch.gh.Repositories.GenerateReleaseNotes(
-			ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
-				TagName: ver,
-			})
-		if err != nil {
-			return nil, nil, err
-		}
-		origLogs = append(origLogs, releases.Body)
-		logs = append(logs, strings.TrimSpace(convertKeepAChangelogFormat(releases.Body, d))+"\n")
+		origLogs = append(origLogs, orig)
+		logs = append(logs, log)
 	}
 	return logs, origLogs, nil
 }
@@ -257,8 +271,4 @@ func (gch *GH2Changelog) defaultBranch() (string, error) {
 		return "", fmt.Errorf("failed to detect default branch from remote: %s", gch.remoteName)
 	}
 	return m[1], nil
-}
-
-func (gch *GH2Changelog) versionStrings() []string {
-	return (&gitsemvers.Semvers{GitPath: gch.gitPath, RepoPath: gch.repoPath}).VersionStrings()
 }

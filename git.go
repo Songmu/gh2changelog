@@ -9,6 +9,12 @@ import (
 	"sync"
 )
 
+type gitter interface {
+	Git(...string) (string, string, error)
+}
+
+var _ gitter = (*commander)(nil)
+
 type commander struct {
 	outStream, errStream io.Writer
 	gitPath, dir         string
