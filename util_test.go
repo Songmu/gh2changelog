@@ -8,6 +8,5 @@ func Mock(t *testing.T, vers []string, g gitter, gen releaseNoteGenerator) Optio
 		gch.semvers = vers
 		gch.c = g
 		gch.gen = gen
-		gch.repoPath = t.TempDir()
 	}
 }

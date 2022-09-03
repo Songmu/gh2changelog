@@ -14,7 +14,8 @@ import (
 func TestGH2Changelog(t *testing.T) {
 	ctx := context.Background()
 	gch, err := gh2changelog.New(ctx,
-		gh2changelog.Mock(t, []string{"v1.0.1"}, &mockGitter{}, &mockRelGen{}))
+		gh2changelog.Mock(t, []string{"v1.0.1"}, &mockGitter{}, &mockRelGen{}),
+		gh2changelog.RepoPath(t.TempDir()))
 	if err != nil {
 		t.Error(err)
 	}
