@@ -25,7 +25,7 @@ gh2changelog generates keep a changelog like output from GitHub Releases
 ## Description
 
 The "gh2changelog" outputs a changelog of the "Keep a changelog" like format and writes it to CHANGELOG.md.
-To generate a changelog, use "generate-notes" in the GitHub REST API's Releases.
+To generate a changelog, it utilizes "generate-notes" in the GitHub REST API's Releases.
 
 - https://keepachangelog.com/
 - https://docs.github.com/ja/rest/releases/releases#generate-release-notes-content-for-a-release
