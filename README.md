@@ -48,10 +48,10 @@ To generate a changelog, use "generate-notes" in the GitHub REST API's Releases.
 
 ## GITHUB Token
 
-When github's api token is required, it is used in the following order of priority.
+GitHub's access token is used in the following order of priority.
 
-- command line option `--token`
 - enviroment variable `GITHUB_TOKEN`
+- read from `gh` cli configurations
 - `git config github.token`
 
 ## Installation
@@ -65,6 +65,9 @@ When github's api token is required, it is used in the following order of priori
 
 # In alpine linux (as it does not come with curl by default)
 % wget -O - -q https://raw.githubusercontent.com/Songmu/gh2changelog/main/install.sh | sh -s [vX.Y.Z]
+
+# homebrew
+% brew install Songmu/tap/gh2changelog
 
 # go install
 % go install github.com/Songmu/gh2changelog/cmd/gh2changelog@latest
