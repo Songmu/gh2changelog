@@ -1,5 +1,7 @@
 # Changelog
 
+## [v0.0.4](https://github.com/Songmu/gh2changelog/compare/v0.0.3...v0.0.4) - 2022-09-07
+
 ## [v0.0.3](https://github.com/Songmu/gh2changelog/compare/v0.0.2...v0.0.3) - 2022-09-03
 - update go-github and Songmu/gitconfig by @Songmu in https://github.com/Songmu/gh2changelog/pull/8
 
