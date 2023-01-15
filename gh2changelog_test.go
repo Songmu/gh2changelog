@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/Songmu/gh2changelog"
-	"github.com/google/go-github/v47/github"
+	"github.com/google/go-github/v49/github"
 )
 
 func TestGH2Changelog(t *testing.T) {
