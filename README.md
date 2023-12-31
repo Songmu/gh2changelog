@@ -71,6 +71,9 @@ GitHub's access token is used in the following order of priority.
 
 # go install
 % go install github.com/Songmu/gh2changelog/cmd/gh2changelog@latest
+
+# aqua https://aquaproj.github.io/
+% aqua g -i Songmu/gh2changelog
 ```
 
 Built binaries are available on gihub releases.
