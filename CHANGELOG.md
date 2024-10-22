@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.1.0](https://github.com/Songmu/gh2changelog/compare/v0.0.5...v0.1.0) - 2024-10-22
+- update deps and Go version by @Songmu in https://github.com/Songmu/gh2changelog/pull/18
+
 ## [v0.0.5](https://github.com/Songmu/gh2changelog/compare/v0.0.4...v0.0.5) - 2023-12-31
 - docs: add the installation guide with aqua by @suzuki-shunsuke in https://github.com/Songmu/gh2changelog/pull/15
 - udpate deps by @Songmu in https://github.com/Songmu/gh2changelog/pull/16
