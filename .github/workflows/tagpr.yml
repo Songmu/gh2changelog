@@ -7,10 +7,10 @@ jobs:
   tagpr:
     runs-on: ubuntu-latest
     steps:
-    - name: checkout
-      uses: actions/checkout@v3
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
+        persist-credentials: false
         token: ${{ secrets.GH_PAT }}
-    - uses: Songmu/tagpr@main
+    - uses: Songmu/tagpr@163cd45f79765d46a829a18dd20df2df58ead690 # v1.8.0
       env:
         GITHUB_TOKEN: ${{ secrets.GH_PAT }}
