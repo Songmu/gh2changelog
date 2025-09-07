@@ -18,3 +18,5 @@ jobs:
     - name: build
       run: |
         make crossbuild upload
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
