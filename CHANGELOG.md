@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.2.0](https://github.com/Songmu/gh2changelog/compare/v0.1.0...v0.2.0) - 2025-09-07
+- update deps and github actions by @Songmu in https://github.com/Songmu/gh2changelog/pull/20
+
 ## [v0.1.0](https://github.com/Songmu/gh2changelog/compare/v0.0.5...v0.1.0) - 2024-10-22
 - update deps and Go version by @Songmu in https://github.com/Songmu/gh2changelog/pull/18
 
