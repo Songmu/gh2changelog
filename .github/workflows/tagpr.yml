@@ -12,6 +12,6 @@ jobs:
       with:
         persist-credentials: false
         token: ${{ secrets.GH_PAT }}
-    - uses: Songmu/tagpr@163cd45f79765d46a829a18dd20df2df58ead690 # v1.8.0
+    - uses: Songmu/tagpr@ccee1d56427b793d145ba80c18f4c251c53ae65c # v1.8.3
       env:
         GITHUB_TOKEN: ${{ secrets.GH_PAT }}
