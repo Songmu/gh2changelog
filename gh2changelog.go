@@ -92,16 +92,19 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 }
 
 // Draft gets draft changelog
-func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string, releaseDate time.Time) (string, string, error) {
+func (gch *GH2Changelog) Draft(
+	ctx context.Context, nextTag, releaseBranch string, releaseDate time.Time) (string, string, error) {
 	vers := gch.semvers
 	var previousTag *string
 	if len(vers) > 0 {
 		previousTag = &vers[0]
 	}
-
-	releaseBranch, err := gch.defaultBranch()
-	if err != nil {
-		return "", "", err
+	if releaseBranch == "" {
+		var err error
+		releaseBranch, err = gch.defaultBranch()
+		if err != nil {
+			return "", "", err
+		}
 	}
 	releases, _, err := gch.gen.GenerateReleaseNotes(
 		ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
@@ -118,7 +121,7 @@ func (gch *GH2Changelog) Draft(ctx context.Context, nextTag string, releaseDate 
 // Unreleased gets unreleased changelog
 func (gch *GH2Changelog) Unreleased(ctx context.Context) (string, string, error) {
 	const tentativeTag = "v999999.999.999"
-	body, orig, err := gch.Draft(ctx, tentativeTag, time.Now())
+	body, orig, err := gch.Draft(ctx, tentativeTag, "", time.Now())
 	if err != nil {
 		return "", "", err
 	}
@@ -264,7 +267,7 @@ func (gch *GH2Changelog) defaultBranch() (string, error) {
 	// So use `git remote show origin` for detecting default branch
 	show, _, err := gch.c.Git("remote", "show", gch.remoteName)
 	if err != nil {
-		return "", fmt.Errorf("failed to detect defaut branch: %w", err)
+		return "", fmt.Errorf("failed to detect default branch: %w", err)
 	}
 	m := headBranchReg.FindStringSubmatch(show)
 	if len(m) < 2 {
