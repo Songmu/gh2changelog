@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.3.0](https://github.com/Songmu/gh2changelog/compare/v0.2.0...v0.3.0) - 2025-09-08
+- breaking: change interface of Draft, accepts releaseBranch as argument by @Songmu in https://github.com/Songmu/gh2changelog/pull/23
+
 ## [v0.2.0](https://github.com/Songmu/gh2changelog/compare/v0.1.0...v0.2.0) - 2025-09-07
 - update deps and github actions by @Songmu in https://github.com/Songmu/gh2changelog/pull/20
 
