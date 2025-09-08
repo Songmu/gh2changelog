@@ -80,7 +80,7 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		if *unreleased {
 			log.Println("Both unreleased and next options are specified, but next takes precedence.")
 		}
-		out, _, err := gch.Draft(ctx, *next, time.Now())
+		out, _, err := gch.Draft(ctx, *next, "", time.Now())
 		if err != nil {
 			return err
 		}

@@ -20,7 +20,7 @@ func TestGH2Changelog(t *testing.T) {
 		t.Error(err)
 	}
 
-	out, _, err := gch.Draft(ctx, "v1.0.1", time.Date(2022, time.September, 3, 0, 0, 0, 0, time.UTC))
+	out, _, err := gch.Draft(ctx, "v1.0.1", "", time.Date(2022, time.September, 3, 0, 0, 0, 0, time.UTC))
 	if err != nil {
 		t.Error(err)
 	}
