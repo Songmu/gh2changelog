@@ -8,7 +8,7 @@ require (
 	github.com/Songmu/gitconfig v0.2.1
 	github.com/Songmu/gitsemvers v0.0.3
 	github.com/google/go-github/v74 v74.0.0
-	golang.org/x/oauth2 v0.31.0
+	golang.org/x/oauth2 v0.33.0
 )
 
 require (
