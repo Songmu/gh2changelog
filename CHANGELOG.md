@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.3.1](https://github.com/Songmu/gh2changelog/compare/v0.3.0...v0.3.1) - 2025-11-24
+- Bump golang.org/x/oauth2 from 0.31.0 to 0.33.0 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/27
+- Bump Songmu/tagpr from 1.8.0 to 1.9.0 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/25
+- Bump actions/setup-go from 6.0.0 to 6.1.0 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/30
+- Bump actions/checkout from 5.0.0 to 6.0.0 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/29
+
 ## [v0.3.0](https://github.com/Songmu/gh2changelog/compare/v0.2.0...v0.3.0) - 2025-09-08
 - breaking: change interface of Draft, accepts releaseBranch as argument by @Songmu in https://github.com/Songmu/gh2changelog/pull/23
 
