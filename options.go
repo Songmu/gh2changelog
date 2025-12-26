@@ -34,3 +34,10 @@ func GitHubClient(cli *github.Client) Option {
 		gch.gen = cli.Repositories
 	}
 }
+
+// TagPrefix sets a tag prefix for monorepo support
+func TagPrefix(p string) Option {
+	return func(gch *GH2Changelog) {
+		gch.tagPrefix = p
+	}
+}
