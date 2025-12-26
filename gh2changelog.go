@@ -23,8 +23,9 @@ type releaseNoteGenerator interface {
 
 // GH2Changelog is to output changelogs
 type GH2Changelog struct {
-	gitPath  string
-	repoPath string
+	gitPath   string
+	repoPath  string
+	tagPrefix string
 
 	owner, repo, remoteName string
 	outStream, errStream    io.Writer
@@ -57,7 +58,11 @@ func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 			errStream: gch.errStream}
 	}
 	if gch.semvers == nil {
-		gch.semvers = (&gitsemvers.Semvers{GitPath: gch.gitPath, RepoPath: gch.repoPath}).VersionStrings()
+		gch.semvers = (&gitsemvers.Semvers{
+			GitPath:   gch.gitPath,
+			RepoPath:  gch.repoPath,
+			TagPrefix: gch.tagPrefix,
+		}).VersionStrings()
 	}
 
 	var err error
