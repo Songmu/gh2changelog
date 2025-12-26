@@ -1,0 +1,21 @@
+name: release
+description: release gh2changelog
+inputs:
+  tag:
+    description: tag name to be released
+    default: ''
+  token:
+    description: GitHub token
+    required: true
+runs:
+  using: composite
+  steps:
+  - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+    with:
+      go-version-file: go.mod
+  - name: release
+    run: |
+      make crossbuild upload
+    shell: bash
+    env:
+      GITHUB_TOKEN: ${{ inputs.token }}
