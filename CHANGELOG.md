@@ -1,5 +1,7 @@
 # Changelog
 
+## [v0.4.1](https://github.com/Songmu/gh2changelog/compare/v0.4.0...v0.4.1) - 2025-12-26
+
 ## [v0.4.0](https://github.com/Songmu/gh2changelog/compare/v0.3.0...v0.4.0) - 2025-12-26
 - Bump golang.org/x/oauth2 from 0.31.0 to 0.33.0 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/27
 - Bump Songmu/tagpr from 1.8.0 to 1.9.0 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/25
