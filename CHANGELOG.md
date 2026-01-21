@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.5.0](https://github.com/Songmu/gh2changelog/compare/v0.4.0...v0.5.0) - 2026-01-21
+- Add option for changelogMd path by @wreulicke in https://github.com/Songmu/gh2changelog/pull/42
+- Bump actions/setup-go from 6.1.0 to 6.2.0 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/41
+- Bump Songmu/tagpr from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/40
+
 ## [v0.4.0](https://github.com/Songmu/gh2changelog/compare/v0.3.0...v0.4.0) - 2025-12-26
 - Bump golang.org/x/oauth2 from 0.31.0 to 0.33.0 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/27
 - Bump Songmu/tagpr from 1.8.0 to 1.9.0 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/25
