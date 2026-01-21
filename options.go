@@ -41,3 +41,10 @@ func TagPrefix(p string) Option {
 		gch.tagPrefix = p
 	}
 }
+
+// ChangelogMdPath sets a changelog markdown file path
+func ChangelogMdPath(p string) Option {
+	return func(gch *GH2Changelog) {
+		gch.changelogMdPath = p
+	}
+}

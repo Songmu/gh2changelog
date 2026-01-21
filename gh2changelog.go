@@ -23,9 +23,10 @@ type releaseNoteGenerator interface {
 
 // GH2Changelog is to output changelogs
 type GH2Changelog struct {
-	gitPath   string
-	repoPath  string
-	tagPrefix string
+	gitPath         string
+	repoPath        string
+	tagPrefix       string
+	changelogMdPath string
 
 	owner, repo, remoteName string
 	outStream, errStream    io.Writer
@@ -41,10 +42,11 @@ type Option func(*GH2Changelog)
 // New returns new GH2Changelog
 func New(ctx context.Context, opts ...Option) (*GH2Changelog, error) {
 	gch := &GH2Changelog{
-		gitPath:   "git",
-		repoPath:  ".",
-		outStream: io.Discard,
-		errStream: io.Discard,
+		gitPath:         "git",
+		repoPath:        ".",
+		changelogMdPath: defaultChangelogMd,
+		outStream:       io.Discard,
+		errStream:       io.Discard,
 	}
 	for _, opt := range opts {
 		opt(gch)
@@ -195,8 +197,8 @@ const (
 )
 
 const (
-	changelogMd = "CHANGELOG.md"
-	heading     = "# Changelog\n"
+	defaultChangelogMd = "CHANGELOG.md"
+	heading            = "# Changelog\n"
 )
 
 // Update CHANGELOG.md
@@ -230,7 +232,10 @@ func (gch *GH2Changelog) Update(section string, mode int) (string, error) {
 }
 
 func (gch *GH2Changelog) path() string {
-	return filepath.Join(gch.repoPath, changelogMd)
+	if gch.changelogMdPath != "" {
+		return filepath.Join(gch.repoPath, gch.changelogMdPath)
+	}
+	return filepath.Join(gch.repoPath, defaultChangelogMd)
 }
 
 func (gch *GH2Changelog) detectRemote() (string, error) {
