@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.6.0](https://github.com/Songmu/gh2changelog/compare/v0.5.0...v0.6.0) - 2026-01-28
+- Enable to configure release yaml by @wreulicke in https://github.com/Songmu/gh2changelog/pull/45
+- Bump actions/checkout from 6.0.1 to 6.0.2 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/44
+- Bump Songmu/tagpr from 1.11.1 to 1.12.1 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/43
+
 ## [v0.5.0](https://github.com/Songmu/gh2changelog/compare/v0.4.0...v0.5.0) - 2026-01-21
 - Add option for changelogMd path by @wreulicke in https://github.com/Songmu/gh2changelog/pull/42
 - Bump actions/setup-go from 6.1.0 to 6.2.0 by @dependabot[bot] in https://github.com/Songmu/gh2changelog/pull/41
