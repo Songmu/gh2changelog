@@ -6,7 +6,7 @@ import (
 	"net/url"
 
 	"github.com/Songmu/gitconfig"
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v82/github"
 	"golang.org/x/oauth2"
 )
 
