@@ -3,7 +3,7 @@ package gh2changelog
 import (
 	"io"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v82/github"
 )
 
 // GitPath sets a git executable path
@@ -46,5 +46,11 @@ func TagPrefix(p string) Option {
 func ChangelogMdPath(p string) Option {
 	return func(gch *GH2Changelog) {
 		gch.changelogMdPath = p
+	}
+}
+
+func ReleaseYamlPath(p string) Option {
+	return func(gch *GH2Changelog) {
+		gch.releaseYamlPath = &p
 	}
 }

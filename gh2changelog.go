@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/Songmu/gitsemvers"
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v82/github"
 )
 
 type releaseNoteGenerator interface {
@@ -27,6 +27,7 @@ type GH2Changelog struct {
 	repoPath        string
 	tagPrefix       string
 	changelogMdPath string
+	releaseYamlPath *string
 
 	owner, repo, remoteName string
 	outStream, errStream    io.Writer
@@ -115,9 +116,10 @@ func (gch *GH2Changelog) Draft(
 	}
 	releases, _, err := gch.gen.GenerateReleaseNotes(
 		ctx, gch.owner, gch.repo, &github.GenerateNotesOptions{
-			TagName:         nextTag,
-			PreviousTagName: previousTag,
-			TargetCommitish: &releaseBranch,
+			TagName:               nextTag,
+			PreviousTagName:       previousTag,
+			TargetCommitish:       &releaseBranch,
+			ConfigurationFilePath: gch.releaseYamlPath,
 		})
 	if err != nil {
 		return "", "", err
