@@ -48,3 +48,9 @@ func ChangelogMdPath(p string) Option {
 		gch.changelogMdPath = p
 	}
 }
+
+func ReleaseYamlPath(p string) Option {
+	return func(gch *GH2Changelog) {
+		gch.releaseYamlPath = &p
+	}
+}

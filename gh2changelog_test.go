@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -114,6 +115,29 @@ func TestGH2Changelog(t *testing.T) {
 	}
 }
 
+func TestDraftWithReleaseYamlPath(t *testing.T) {
+	ctx := context.Background()
+	gch, err := gh2changelog.New(ctx,
+		gh2changelog.Mock(t, []string{"v1.0.1"}, &mockGitter{}, &mockRelGen{}),
+		gh2changelog.RepoPath(t.TempDir()),
+		gh2changelog.ReleaseYamlPath(".github/custom-release.yml"),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, orig, err := gch.Draft(ctx, "v1.0.2", "", time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Body に ConfigurationFilePath が反映されていることを検証
+	expect := "<!-- Release notes generated using configuration in .github/custom-release.yml at v1.0.2 -->"
+	if !strings.Contains(orig, expect) {
+		t.Errorf("expected Body to contain %q, but got:\n%s", expect, orig)
+	}
+}
+
 type mockRelGen struct {
 }
 
@@ -121,8 +145,12 @@ func (mr *mockRelGen) GenerateReleaseNotes(
 	ctx context.Context, owner, repo string, opts *github.GenerateNotesOptions) (
 	*github.RepositoryReleaseNotes, *github.Response, error) {
 
+	releaseYaml := ".github/release.yml"
+	if opts.ConfigurationFilePath != nil {
+		releaseYaml = *opts.ConfigurationFilePath
+	}
 	return &github.RepositoryReleaseNotes{
-		Body: fmt.Sprintf(`<!-- Release notes generated using configuration in .github/release.yml at %[1]s -->
+		Body: fmt.Sprintf(`<!-- Release notes generated using configuration in %[1]s at %[2]s -->
 ## What's Changed
 * add github.go for github client by @Songmu in https://github.com/Songmu/gh2changelog/pull/1
 * tagging semver to merged gh2changelog by @Songmu in https://github.com/Songmu/gh2changelog/pull/19
@@ -130,8 +158,8 @@ func (mr *mockRelGen) GenerateReleaseNotes(
 ## New Contributors
 * @Songmu made their first contribution in https://github.com/Songmu/gh2changelog/pull/1
 
-**Full Changelog**: https://github.com/Songmu/gh2changelog/commits/%[1]s
-`, opts.TagName),
+**Full Changelog**: https://github.com/Songmu/gh2changelog/commits/%[2]s
+`, releaseYaml, opts.TagName),
 	}, nil, nil
 }
 
