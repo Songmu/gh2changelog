@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.7.1](https://github.com/Songmu/gh2changelog/compare/v0.7.0...v0.7.1) - 2026-02-14
+- Flatten project structure: move cmd/gh2changelog to root by @Copilot in https://github.com/Songmu/gh2changelog/pull/54
+- udpate deps by @Songmu in https://github.com/Songmu/gh2changelog/pull/56
+
 ## [v0.7.0](https://github.com/Songmu/gh2changelog/compare/v0.6.0...v0.7.0) - 2026-02-14
 - Transform repository to CLI-only, depending on tagpr/gh2changelog library by @Copilot in https://github.com/Songmu/gh2changelog/pull/52
 
