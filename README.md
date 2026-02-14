@@ -70,7 +70,7 @@ GitHub's access token is used in the following order of priority.
 % brew install Songmu/tap/gh2changelog
 
 # go install
-% go install github.com/Songmu/gh2changelog/cmd/gh2changelog@latest
+% go install github.com/Songmu/gh2changelog@latest
 
 # aqua https://aquaproj.github.io/
 % aqua g -i Songmu/gh2changelog
