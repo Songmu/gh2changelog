@@ -3,14 +3,14 @@ gh2changelog
 
 [![Test Status](https://github.com/Songmu/gh2changelog/workflows/test/badge.svg?branch=main)][actions]
 [![MIT License](https://img.shields.io/github/license/Songmu/gh2changelog)][license]
-[![PkgGoDev](https://pkg.go.dev/badge/github.com/Songmu/gh2changelog)][PkgGoDev]
 
 [actions]: https://github.com/Songmu/gh2changelog/actions?workflow=test
 [license]: https://github.com/Songmu/gh2changelog/blob/main/LICENSE
-[PkgGoDev]: https://pkg.go.dev/github.com/Songmu/gh2changelog
 
 gh2changelog generates keep a changelog like output from GitHub Releases
 
+
+> **Note:** The library code has been migrated to [github.com/Songmu/tagpr/gh2changelog](https://pkg.go.dev/github.com/Songmu/tagpr/gh2changelog). This repository now provides only the CLI tool.
 ## Synopsis
 
 ```console

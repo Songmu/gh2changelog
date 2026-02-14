@@ -19,7 +19,7 @@ func run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 	flagSet := flag.NewFlagSet(
 		fmt.Sprintf("%s (v%s rev:%s)", cmdName, version, revision), flag.ContinueOnError)
 	flagSet.SetOutput(errStream)
-	
+
 	// Define flags
 	showVersion := flagSet.Bool("version", false, "display version")
 	gitCmd := flagSet.String("git", "git", "git path")
@@ -37,7 +37,7 @@ func run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 	if err := flagSet.Parse(argv); err != nil {
 		return err
 	}
-	
+
 	if *showVersion {
 		return printVersion(outStream)
 	}
@@ -47,12 +47,12 @@ func run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 	if *verboseMode {
 		options = append(options, gh2changelog.SetOutputs(outStream, errStream))
 	}
-	
+
 	gch, err := gh2changelog.New(ctx, options...)
 	if err != nil {
 		return err
 	}
-	
+
 	if *showAll {
 		if *limitCount != 0 {
 			log.Println("Both the limit and all options are specified, but the all option takes precedence.")
@@ -121,7 +121,7 @@ func run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		_, err = fmt.Fprint(outStream, combinedOutput)
 		return err
 	}
-	
+
 	return output(gch, outStream, combinedOutput, 0, *writeFile)
 }
 
