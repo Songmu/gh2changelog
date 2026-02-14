@@ -5,19 +5,20 @@ import (
 	"flag"
 	"log"
 	"os"
-
-	"github.com/Songmu/gh2changelog"
 )
 
 func main() {
 	log.SetFlags(0)
-	err := gh2changelog.Run(context.Background(), os.Args[1:], os.Stdout, os.Stderr)
+	
+	arguments := os.Args[1:]
+	err := run(context.Background(), arguments, os.Stdout, os.Stderr)
+	
 	if err != nil && err != flag.ErrHelp {
 		log.Println(err)
-		exitCode := 1
-		if ecoder, ok := err.(interface{ ExitCode() int }); ok {
-			exitCode = ecoder.ExitCode()
+		code := 1
+		if exitCoder, ok := err.(interface{ ExitCode() int }); ok {
+			code = exitCoder.ExitCode()
 		}
-		os.Exit(exitCode)
+		os.Exit(code)
 	}
 }
