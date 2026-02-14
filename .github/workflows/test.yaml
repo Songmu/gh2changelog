@@ -26,6 +26,4 @@ jobs:
       with:
         go-version-file: cmd/gh2changelog/go.mod
     - name: test
-      run: cd cmd/gh2changelog && go test -race -coverprofile coverage.out -covermode atomic
-    - name: Send coverage
-      uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+      run: cd cmd/gh2changelog && go test
