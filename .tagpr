@@ -25,5 +25,5 @@
 [tagpr]
 	vPrefix = true
 	releaseBranch = main
-	versionFile = version.go
+	versionFile = cmd/gh2changelog/version.go
 	release = draft

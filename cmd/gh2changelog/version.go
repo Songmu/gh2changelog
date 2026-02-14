@@ -1,4 +1,4 @@
-package gh2changelog
+package main
 
 const version = "0.6.0"
 
