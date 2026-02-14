@@ -18,11 +18,11 @@ test:
 
 .PHONY: build
 build:
-	cd cmd/gh2changelog && go build -ldflags=$(BUILD_LDFLAGS)
+	go build -ldflags=$(BUILD_LDFLAGS) ./cmd/gh2changelog
 
 .PHONY: install
 install:
-	cd cmd/gh2changelog && go install -ldflags=$(BUILD_LDFLAGS)
+	go install -ldflags=$(BUILD_LDFLAGS) ./cmd/gh2changelog
 
 CREDITS: cmd/gh2changelog/go.sum deps devel-deps
 	godzil credits -w

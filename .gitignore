@@ -1,2 +1,5 @@
 dist
 cmd/gh2changelog/gh2changelog
+gh2changelog
+go.work
+go.work.sum
