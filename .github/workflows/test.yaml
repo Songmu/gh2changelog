@@ -24,8 +24,8 @@ jobs:
         persist-credentials: false
     - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
       with:
-        go-version-file: go.mod
+        go-version-file: cmd/gh2changelog/go.mod
     - name: test
-      run: go test -race -coverprofile coverage.out -covermode atomic ./...
+      run: cd cmd/gh2changelog && go test -race -coverprofile coverage.out -covermode atomic
     - name: Send coverage
       uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2

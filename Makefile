@@ -1,12 +1,11 @@
 VERSION = $(shell godzil show-version)
 CURRENT_REVISION = $(shell git rev-parse --short HEAD)
-BUILD_LDFLAGS = "-s -w -X github.com/Songmu/gh2changelog.revision=$(CURRENT_REVISION)"
+BUILD_LDFLAGS = "-s -w -X main.revision=$(CURRENT_REVISION)"
 u := $(if $(update),-u)
 
 .PHONY: deps
 deps:
-	go get ${u}
-	go mod tidy
+	cd cmd/gh2changelog && go get ${u} && go mod tidy
 
 .PHONY: devel-deps
 devel-deps:
@@ -15,17 +14,17 @@ devel-deps:
 
 .PHONY: test
 test:
-	go test
+	cd cmd/gh2changelog && go test
 
 .PHONY: build
 build:
-	go build -ldflags=$(BUILD_LDFLAGS) ./cmd/gh2changelog
+	cd cmd/gh2changelog && go build -ldflags=$(BUILD_LDFLAGS)
 
 .PHONY: install
 install:
-	go install -ldflags=$(BUILD_LDFLAGS) ./cmd/gh2changelog
+	cd cmd/gh2changelog && go install -ldflags=$(BUILD_LDFLAGS)
 
-CREDITS: go.sum deps devel-deps
+CREDITS: cmd/gh2changelog/go.sum deps devel-deps
 	godzil credits -w
 
 DIST_DIR = dist
