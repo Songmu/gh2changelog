@@ -5,7 +5,7 @@ u := $(if $(update),-u)
 
 .PHONY: deps
 deps:
-	cd cmd/gh2changelog && go get ${u} && go mod tidy
+	go get ${u} && go mod tidy
 
 .PHONY: devel-deps
 devel-deps:
@@ -14,17 +14,17 @@ devel-deps:
 
 .PHONY: test
 test:
-	cd cmd/gh2changelog && go test
+	go test
 
 .PHONY: build
 build:
-	go build -ldflags=$(BUILD_LDFLAGS) ./cmd/gh2changelog
+	go build -ldflags=$(BUILD_LDFLAGS) .
 
 .PHONY: install
 install:
-	go install -ldflags=$(BUILD_LDFLAGS) ./cmd/gh2changelog
+	go install -ldflags=$(BUILD_LDFLAGS) .
 
-CREDITS: cmd/gh2changelog/go.sum deps devel-deps
+CREDITS: go.sum deps devel-deps
 	godzil credits -w
 
 DIST_DIR = dist
@@ -32,7 +32,7 @@ DIST_DIR = dist
 crossbuild: CREDITS
 	rm -rf $(DIST_DIR)
 	godzil crossbuild -pv=v$(VERSION) -build-ldflags=$(BUILD_LDFLAGS) \
-      -os=linux,darwin -d=$(DIST_DIR) ./cmd/*
+      -os=linux,darwin -d=$(DIST_DIR) .
 	cd $(DIST_DIR) && shasum -a 256 $$(find * -type f -maxdepth 0) > SHA256SUMS
 
 .PHONY: upload

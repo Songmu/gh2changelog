@@ -1,4 +1,4 @@
-module github.com/Songmu/gh2changelog/cmd/gh2changelog
+module github.com/Songmu/gh2changelog
 
 go 1.25.0
 
